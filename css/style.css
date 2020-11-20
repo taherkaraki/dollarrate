@@ -35,7 +35,7 @@ img{max-width:100%;}
 body{
 	font-family: 'ambleregular';
 	background:#1f253d;
-	padding:100px 0;
+	/*padding:100px 0;*/
 	position:relative;
 }
 .wrap{
@@ -1104,7 +1104,7 @@ fieldset#body {
 		width:95%;
 	}
 	body{
-		margin:30px 0;
+		/*margin:30px 0;*/
 	}
 	.column_left, .column_middle, .column_right {
 		float:none;
