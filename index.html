@@ -1,1 +1,193 @@
-test
+<!--A Design by W3layouts
+Author: W3layout
+Author URL: http://w3layouts.com
+License: Creative Commons Attribution 3.0 Unported
+License URL: http://creativecommons.org/licenses/by/3.0/
+-->
+<!DOCTYPE HTML>
+<head>
+<title>DOLLAR LIRA Rate</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link href="css/style.css" rel="stylesheet" type="text/css" media="all"/>
+<link href="css/nav.css" rel="stylesheet" type="text/css" media="all"/>
+<link href='http://fonts.googleapis.com/css?family=Carrois+Gothic+SC' rel='stylesheet' type='text/css'>
+<script type="text/javascript" src="js/jquery.js"></script>
+ <script type="text/javascript" src="js/jquery.easing.js"></script>
+ <script type="text/javascript" src="js/jquery.ulslide.js"></script>
+<script>
+function updateRatesDataV2() {
+    let headers = { headers: {
+            'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvbGlyYXJhdGUuY29tIiwiaWF0IjoxNTkzMDI3NzQ2LCJuYmYiOjE1OTMwMjc3NDYsImV4cCI6MTYyNTE2ODU0NiwiZGF0YSI6eyJ1c2VyIjp7ImlkIjoiMiJ9fX0.cVv8n9ZLnrv02rgqTUSM_eOOtnsEN5ITHFxXqmjgYwo'
+        } };
+
+    fetch( atob("aHR0cHM6Ly9saXJhcmF0ZS5jb20vd3AtanNvbi9saXJhcmF0ZS92Mi9yYXRlcz9jdXJyZW5jeT1MQlAmX3Zlcj10") + getHoursStamp(), headers )
+        .then( (resp) => resp.json() )
+        .then(function(data) {
+			const str = JSON.stringify(data, null, 4);
+			//console.log(str);
+			
+			updateItems(data, 5);
+            //updateGraph(data.buy);
+        });
+}
+
+function updateItems(data, items) {
+	let i=0;
+
+	while(i <= items) {
+		console.log("sell_"+i.toLocaleString()+": SELL:&nbsp;" + (data.sell[data.sell.length -i - 1][1]).toLocaleString());
+		document.getElementById("sell_"+i.toLocaleString()).innerHTML = "SELL:&nbsp;" + (data.sell[data.sell.length -i - 1][1]).toLocaleString();
+		
+		console.log("buy_"+i.toLocaleString()+": SELL:&nbsp;" + (data.buy[data.buy.length -i - 1][1]).toLocaleString());
+		document.getElementById("buy_"+i.toLocaleString()).innerHTML = "BUY:&nbsp;&nbsp;" + (data.buy[data.buy.length -i - 1][1]).toLocaleString();
+		
+		let latestTimestamp = new Date(data.buy[data.buy.length -i - 1][0]);
+		let current = new Date();
+		let timeDiff = timeDifference(current,latestTimestamp);
+		let latestUpdated = ( timeDiff < 0 ) ? '' : '' + timeDiff;
+		console.log("updated_"+i.toLocaleString()+": " + latestUpdated);
+		document.getElementById("updated_"+i.toLocaleString()).innerHTML = latestUpdated;
+
+		let h =  latestTimestamp.getHours(), m = latestTimestamp.getMinutes();
+		let _time = (h > 12) ? (h-12 + ':' + m +'pm') : (h + ':' + m +'am');
+		let dateString = _time + " " + latestTimestamp.getUTCDate() + "-" + (latestTimestamp.getUTCMonth()+1) + "-" + latestTimestamp.getUTCFullYear();
+		console.log("updated-datetime_"+i.toLocaleString()+": " + "at " + dateString);
+		document.getElementById("updated-datetime_"+i.toLocaleString()).innerHTML = "at " + dateString;
+		
+		if (data.buy[data.buy.length -i - 1][1] > data.buy[data.buy.length -i - 2][1]) {
+			console.log(i+": up");
+			document.getElementById("arrow_"+i.toLocaleString()).src = 'images/arrow_up.png';
+		}
+		else if (data.buy[data.buy.length -i - 1][1] < data.buy[data.buy.length -i - 2][1]) {
+			console.log(i+": down");
+			document.getElementById("arrow_"+i.toLocaleString()).src = 'images/arrow_down.png';
+		}
+		else {
+			document.getElementById("arrow_"+i.toLocaleString()).src = 'images/arrow_same.png';
+		}
+		
+		i++;
+	}
+}
+
+function timeDifference(current, previous) {
+
+    let msPerMinute = 60 * 1000;
+    let msPerHour = msPerMinute * 60;
+    let msPerDay = msPerHour * 24;
+    let msPerMonth = msPerDay * 30;
+    let msPerYear = msPerDay * 365;
+
+    let elapsed = current - previous;
+
+    if( elapsed < 0 ) {
+        console.log('time difference is negative');
+        console.log(elapsed);
+        return elapsed;
+    }
+
+    if (elapsed < msPerMinute) {
+        return 'a minute ago';
+    }
+
+    else if (elapsed < msPerHour) {
+        return Math.round(elapsed/msPerMinute) + ' MINUTES AGO';
+    }
+
+    else if (elapsed < msPerDay ) {
+        return Math.round(elapsed/msPerHour ) + ' HOURS AGO';
+    }
+
+    else if (elapsed < msPerMonth) {
+        return 'approximately ' + Math.round(elapsed/msPerDay) + ' DAYS AGO';
+    }
+
+    else if (elapsed < msPerYear) {
+        return 'approximately ' + Math.round(elapsed/msPerMonth) + ' MONTHS AGO';
+    }
+
+    else {
+        return 'approximately ' + Math.round(elapsed/msPerYear ) + ' YEARS AGO';
+    }
+}
+function getHoursStamp() {
+    let today = new Date();
+    return  "" + today.getFullYear() + ( today.getMonth()+1 ) + today.getDate() + today.getHours();
+}
+function refreshPage() {
+    let refreshIcon = document.getElementById('refresh-icon');
+    //clearRates();
+    updateRatesDataV2();
+}
+function clearRates() {
+    document.getElementById("latest-sell").innerHTML = "";
+    document.getElementById("latest-buy").innerHTML = "";
+    document.getElementById("last-updated").innerHTML = "";
+    document.getElementById("last-updated-datetime").innerHTML = "";
+}
+function addClass(el, className) {
+    if (el.classList)
+        el.classList.add(className);
+    else if (!hasClass(el, className))
+        el.className += " " + className;
+}
+function hasClass(el, className){
+    if (el.classList)
+        return el.classList.contains(className);
+    return !!el.className.match(new RegExp('(\\s|^)' + className + '(\\s|$)'));
+}
+function removeClass(el, className) {
+    if (el.classList)
+        el.classList.remove(className);
+    else if (hasClass(el, className)) {
+        var reg = new RegExp('(\\s|^)' + className + '(\\s|$)');
+        el.className = el.className.replace(reg, ' ');
+    }
+}
+</script>
+</head>
+<body onLoad="refreshPage(); setTimeout(function(){refreshPage();}, 60000);">	
+	  <div class="main">  
+	    <div class="wrap">  		 
+
+            <div class="column_left">
+		         <div class="weather">
+		               <h3><i><img src="images/LBP_USD.png" width=50 alt="" /> </i> Dollar Lira Rate</h3>
+		              <div class="today_temp">
+		                <div class="temp">
+							<span class="day_name"><font color=white><strong id="updated_0">Loading...</strong><br><font valign=center size=1.5 id="updated-datetime_0">Loading...</font></font><br><br></span><figure><label id="buy_0">BUY:&nbsp; ...</label><br><label id="sell_0">SELL: ...</label><span class="day_name"></span></figure>
+						</div>
+						<div class="temp_right"><br><img id="arrow_0" src="images/statistics-hover.png" width=50 alt="" /></div>
+					</div>
+						<div class="temp_list">
+				      			<ul id="liralist">
+						  		    <li><a href="#"><span class="day_name" id="updated_1">... minutes ago</span>&nbsp; <font valign=center size=1.5 id="updated-datetime_1">at ...</font>
+									<label class="digits">&nbsp;<i><img id="arrow_1" width=32 src="images/statistics-hover.png" alt="" /></i></label><div class="clear"></div>
+									&nbsp;&nbsp;&nbsp;&nbsp;<b id="buy_1">buy:&nbsp; ...</b><br>&nbsp;&nbsp;&nbsp;&nbsp;<b id="sell_1">sell: ...</b></a></li>
+									<li><a href="#"><span class="day_name" id="updated_2">... minutes ago</span>&nbsp; <font valign=center size=1.5 id="updated-datetime_2">at ...</font>
+									<label class="digits">&nbsp;<i><img id="arrow_2" width=32 src="images/statistics-hover.png" alt="" /></i></label><div class="clear"></div>
+									&nbsp;&nbsp;&nbsp;&nbsp;<b id="buy_2">buy:&nbsp; ...</b><br>&nbsp;&nbsp;&nbsp;&nbsp;<b id="sell_2">sell: ...</b></a></li>
+									<li><a href="#"><span class="day_name" id="updated_3">... minutes ago</span>&nbsp; <font valign=center size=1.5 id="updated-datetime_3">at ...</font>
+									<label class="digits">&nbsp;<i><img id="arrow_3" width=32 src="images/statistics-hover.png" alt="" /></i></label><div class="clear"></div>
+									&nbsp;&nbsp;&nbsp;&nbsp;<b id="buy_3">buy:&nbsp; ...</b><br>&nbsp;&nbsp;&nbsp;&nbsp;<b id="sell_3">sell: ...</b></a></li>
+									<li><a href="#"><span class="day_name" id="updated_4">... minutes ago</span>&nbsp; <font valign=center size=1.5 id="updated-datetime_4">at ...</font>
+									<label class="digits">&nbsp;<i><img id="arrow_4" width=32 src="images/statistics-hover.png" alt="" /></i></label><div class="clear"></div>
+									&nbsp;&nbsp;&nbsp;&nbsp;<b id="buy_4">buy:&nbsp; ...</b><br>&nbsp;&nbsp;&nbsp;&nbsp;<b id="sell_4">sell: ...</b></a></li>
+									<li><a href="#"><span class="day_name" id="updated_5">... minutes ago</span>&nbsp; <font valign=center size=1.5 id="updated-datetime_5">at ...</font>
+									<label class="digits">&nbsp;<i><img id="arrow_5" width=32 src="images/statistics-hover.png" alt="" /></i></label><div class="clear"></div>
+									&nbsp;&nbsp;&nbsp;&nbsp;<b id="buy_5">buy:&nbsp; ...</b><br>&nbsp;&nbsp;&nbsp;&nbsp;<b id="sell_5">sell: ...</b></a></li>
+				    		</ul>
+				      </div>
+		          </div>
+    	    </div>
+
+    	<div class="clear"></div>
+ 	 </div>
+   </div>
+  		 <div class="copy-right">
+				<p>© 2020 Designed by <a href="# target="_blank">iTaher</a></p>
+	 	 </div>   
+</body>
+</html>
+
